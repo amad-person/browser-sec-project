@@ -1,4 +1,4 @@
-# Running Mystique in 2023
+# Running Mystique in 2023 on Apple Silicon
 
 ### Bug: While building Mystique, gclient can't find Python 2. 
 
