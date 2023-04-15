@@ -72,4 +72,41 @@ AssertionError: Unrecognized arch machine: aarch64
 Error: Command '/usr/bin/python src/build/download_nacl_toolchains.py --mode nacl_core_sdk sync --extract' returned non-zero exit status 1 in /mnt/chromium
 ```
 
-Fix: ?
+Fix: Build without nacl
+
+1. Update Dockerfile with build flags
+
+```dockerfile
+ADD args.gn /opt/
+RUN echo 'enable_nacl = false' >> /opt/args.gn
+RUN echo 'nacl_clang = false' >> /opt/args.gn
+```
+
+1. Remove the following hook from `src/DEPS`
+
+```
+  {
+    # This downloads binaries for Native Client's newlib toolchain.
+    # Done in lieu of building the toolchain from scratch as it can take
+    # anywhere from 30 minutes to 4 hours depending on platform to build.
+    'name': 'nacltools',
+    'pattern': '.',
+    'action': [
+        'python',
+        'src/build/download_nacl_toolchains.py',
+        '--mode', 'nacl_core_sdk',
+        'sync', '--extract',
+    ],
+  },
+```
+Rebuild the docker image after making these changes, and run the build script.
+
+### Bug: More Apple Silicon issues
+
+```bash
+________ running '/usr/bin/python src/build/linux/sysroot_scripts/install-sysroot.py --running-as-hook' in '/mnt/chromium'
+Unrecognized host arch: aarch64
+Error: Command '/usr/bin/python src/build/linux/sysroot_scripts/install-sysroot.py --running-as-hook' returned non-zero exit status 1 in /mnt/chromium
+```
+
+Fix: :(
