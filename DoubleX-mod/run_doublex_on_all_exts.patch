@@ -1,0 +1,206 @@
+Subject: [PATCH] Patch to run on all extensions
+---
+Index: src/unpack_extension.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/unpack_extension.py b/src/unpack_extension.py
+--- a/src/unpack_extension.py	(revision a732d50f9449cee03171fc71393b744fef6dbeeb)
++++ b/src/unpack_extension.py	(date 1681579940811)
+@@ -17,7 +17,7 @@
+ """
+     Unpacking a Chrome extension and extracting the different components.
+ """
+-
++import glob
+ import os
+ import json
+ import logging
+@@ -233,8 +233,8 @@
+     :param dest: str, path where to store the extracted extension components.
+     """
+ 
+-    extension_id = os.path.basename(extension_crx).split('.crx')[0]
+-    dest = os.path.join(dest, extension_id)
++    # extension_id = os.path.basename(extension_crx).split('.crx')[0]
++    # dest = os.path.join(dest, extension_id)
+ 
+     try:
+         extension_zip = ZipFile(extension_crx)
+@@ -295,14 +295,24 @@
+                                                  " and extracts its manifest, content scripts, "
+                                                  "background scripts/page, and WARs")
+ 
+-    parser.add_argument("-s", "--source", dest='s', metavar="path", type=str,
+-                        required=True, help="path of the packed extension to unpack")
+-    parser.add_argument("-d", "--destination", dest='d', metavar="path", type=str,
+-                        required=True, help="path where to store the extracted extension components"
+-                                            " (note: a specific folder will be created)")
++    # parser.add_argument("-s", "--source", dest='s', metavar="path", type=str,
++    #                     required=True, help="path of the packed extension to unpack")
++    # parser.add_argument("-d", "--destination", dest='d', metavar="path", type=str,
++    #                     required=True, help="path where to store the extracted extension components"
++    #                                         " (note: a specific folder will be created)")
+ 
+-    args = parser.parse_args()
+-    unpack_extension(extension_crx=args.s, dest=args.d)
++    # args = parser.parse_args()
++    crx_path = '/Users/sriram/cmu/browser-sec/project/crawled/crx'
++    out_dir = '/Users/sriram/cmu/browser-sec/project/crawled/out'
++    crx_exts = os.listdir(crx_path)
++    for ext in crx_exts:
++        print(ext)
++        dest_path = os.path.join(out_dir, ext)
++        os.makedirs(dest_path, exist_ok=True)
++        source_crx = os.path.join(crx_path, ext)
++        file_list = [f for f in glob.glob(os.path.join(source_crx, "*.zip"))]
++        if len(file_list) > 0:
++            unpack_extension(extension_crx=os.path.join(source_crx, file_list[0]), dest=dest_path)
+ 
+ 
+ if __name__ == "__main__":
+Index: src/pdg_js/utility_df.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/pdg_js/utility_df.py b/src/pdg_js/utility_df.py
+--- a/src/pdg_js/utility_df.py	(revision a732d50f9449cee03171fc71393b744fef6dbeeb)
++++ b/src/pdg_js/utility_df.py	(date 1681575551978)
+@@ -104,4 +104,4 @@
+     """ Limiting the memory usage to maxsize (in bytes), soft limit. """
+ 
+     soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+-    resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard))
++    # resource.setrlimit(resource.RLIMIT_AS, (0, 0))
+Index: src/doublex.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/doublex.py b/src/doublex.py
+--- a/src/doublex.py	(revision a732d50f9449cee03171fc71393b744fef6dbeeb)
++++ b/src/doublex.py	(date 1681588800139)
+@@ -35,45 +35,62 @@
+                                      description="Static analysis of a browser extension to detect "
+                                                  "suspicious data flows")
+ 
+-    parser.add_argument("-cs", "--content-script", dest='cs', metavar="path", type=str,
+-                        help="path of the content script. "
+-                        "Default: empty/contentscript.js (i.e., empty JS file)")
+-    parser.add_argument("-bp", "--background-page", dest='bp', metavar="path", type=str,
+-                        help="path of the background page "
+-                             "or path of the WAR if the parameter '--war' is given. "
+-                             "Default for background: empty/background.js (i.e., empty JS file)")
+-
+-    parser.add_argument("--war", action='store_true',
+-                        help="indicate that the parameter '-bp' is the path of a WAR")
+-    parser.add_argument("--not-chrome", dest='not_chrome', action='store_true',
+-                        help="indicate that the extension is not based on Chromium, e.g., for a Firefox extension")
++    sources_path = '/Users/sriram/cmu/browser-sec/project/crawled/sources'
+ 
+-    parser.add_argument("--manifest", metavar="path", type=str,
+-                        help="path of the extension manifest.json file. "
+-                             "Default: parent-path-of-content-script/manifest.json")
+-    parser.add_argument("--analysis", metavar="path", type=str,
+-                        help="path of the file to store the analysis results in. "
+-                             "Default: parent-path-of-content-script/analysis.json")
+-    parser.add_argument("--apis", metavar="str", type=str, default='permissions',
+-                        help='''specify the sensitive APIs to consider for the analysis:
+-    - 'permissions' (default): DoubleX selected APIs iff the extension has the corresponding permissions;
+-    - 'all': DoubleX selected APIs irrespective of the extension permissions;
+-    - 'empoweb': APIs from the EmPoWeb paper; to use ONLY on the EmPoWeb ground-truth dataset;
+-    - path: APIs listed in the corresponding json file; a template can be found in src/suspicious_apis/README.md.''')
+ 
+-    # TODO: control verbosity of logging?
+ 
+-    args = parser.parse_args()
++    # parser.add_argument("-cs", "--content-script", dest='cs', metavar="path", type=str,
++    #                     help="path of the content script. "
++    #                     "Default: empty/contentscript.js (i.e., empty JS file)")
++    # parser.add_argument("-bp", "--background-page", dest='bp', metavar="path", type=str,
++    #                     help="path of the background page "
++    #                          "or path of the WAR if the parameter '--war' is given. "
++    #                          "Default for background: empty/background.js (i.e., empty JS file)")
++    #
++    # parser.add_argument("--war", action='store_true',
++    #                     help="indicate that the parameter '-bp' is the path of a WAR")
++    # parser.add_argument("--not-chrome", dest='not_chrome', action='store_true',
++    #                     help="indicate that the extension is not based on Chromium, e.g., for a Firefox extension")
++    #
++    # parser.add_argument("--manifest", metavar="path", type=str,
++    #                     help="path of the extension manifest.json file. "
++    #                          "Default: parent-path-of-content-script/manifest.json")
++    # parser.add_argument("--analysis", metavar="path", type=str,
++    #                     help="path of the file to store the analysis results in. "
++    #                          "Default: parent-path-of-content-script/analysis.json")
++    # parser.add_argument("--apis", metavar="str", type=str, default='all',
++    #                     help='''specify the sensitive APIs to consider for the analysis:
++    # - 'permissions' (default): DoubleX selected APIs iff the extension has the corresponding permissions;
++    # - 'all': DoubleX selected APIs irrespective of the extension permissions;
++    # - 'empoweb': APIs from the EmPoWeb paper; to use ONLY on the EmPoWeb ground-truth dataset;
++    # - path: APIs listed in the corresponding json file; a template can be found in src/suspicious_apis/README.md.''')
++    #
++    # # TODO: control verbosity of logging?
++    #
++    # args = parser.parse_args()
++    #
++    # cs = args.cs
++    # bp = args.bp
++    # if cs is None:
++    #     cs = os.path.join(os.path.dirname(SRC_PATH), 'empty', 'contentscript.js')
++    # if bp is None:
++    #     bp = os.path.join(os.path.dirname(SRC_PATH), 'empty', 'background.js')
+ 
+-    cs = args.cs
+-    bp = args.bp
+-    if cs is None:
+-        cs = os.path.join(os.path.dirname(SRC_PATH), 'empty', 'contentscript.js')
+-    if bp is None:
+-        bp = os.path.join(os.path.dirname(SRC_PATH), 'empty', 'background.js')
+-
+-    analyze_extension(cs, bp, json_analysis=args.analysis, chrome=not args.not_chrome,
+-                      war=args.war, json_apis=args.apis, manifest_path=args.manifest)
++    out_path = '/Users/sriram/cmu/browser-sec/project/crawled/analysis'
++    exts_path = '/Users/sriram/cmu/browser-sec/project/crawled/out'
++    exts = os.listdir(exts_path)
++    for ext in exts:
++        ext_path = os.path.join(exts_path, ext)
++        analysis_path = os.path.join(out_path, ext)
++        if os.path.exists(analysis_path):
++            continue
++        print(ext, ext_path, analysis_path)
++        try:
++            analyze_extension("{}/content_scripts.js".format(ext_path), "{}/background.js".format(ext_path),
++                              json_analysis=analysis_path, chrome=True,
++                              war=None, json_apis='all', manifest_path="{}/manifest.json".format(ext_path))
++        except:
++            continue
+ 
+ 
+ if __name__ == "__main__":
+Index: src/vulnerability_detection.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/vulnerability_detection.py b/src/vulnerability_detection.py
+--- a/src/vulnerability_detection.py	(revision a732d50f9449cee03171fc71393b744fef6dbeeb)
++++ b/src/vulnerability_detection.py	(date 1681581284563)
+@@ -344,6 +344,15 @@
+     if manifest_path is None:
+         manifest_path = os.path.join(extension_path, 'manifest.json')
+ 
++    try:
++        manifest = json.load(open(manifest_path))
++    except FileNotFoundError:
++        logging.critical('No manifest file found in %s', manifest_path)
++        return None
++    res_dict['name'] = manifest['name']
++    res_dict['version'] = manifest['version']
++    res_dict['description'] = manifest.get('description')
++
+     pdg_cs, pdg_bp = build_extension_pdg(cs_path=cs_path, bp_path=bp_path, benchmarks=benchmarks,
+                                          pdg=pdg, chrome=chrome, messages_dict=messages_dict)
+     logging.info('Finished to link CS with BP using the message passing APIs')
