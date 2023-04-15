@@ -8,7 +8,7 @@ Error message:
 /opt/depot_tools/gclient: line 22: exec: python: not found
 ```
 
-Fix: Updated Dockerfile
+Fix: Use updated Dockerfile
 
 ```dockerfile
 FROM ubuntu:xenial
