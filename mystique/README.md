@@ -103,6 +103,8 @@ Rebuild the docker image after making these changes, and run the build script.
 
 ### Bug: More Apple Silicon issues
 
+Error message:
+
 ```bash
 ________ running '/usr/bin/python src/build/linux/sysroot_scripts/install-sysroot.py --running-as-hook' in '/mnt/chromium'
 Unrecognized host arch: aarch64
