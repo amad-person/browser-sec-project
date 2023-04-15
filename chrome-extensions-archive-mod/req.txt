@@ -1,0 +1,11 @@
+requests
+extruct
+termcolor
+portalocker
+tqdm
+jinja2
+arrow
+beautifulsoup4
+elasticsearch_dsl
+flask
+sqlalchemy
