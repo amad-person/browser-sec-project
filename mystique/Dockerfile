@@ -8,7 +8,7 @@ RUN ln -sf /usr/bin/python
 
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
 ADD build.tar.gz /opt/
-RUN echo "N" | /opt/build/install-build-deps.sh && apt-get clean
+RUN echo "N" | /opt/build/install-build-deps.sh --no-nacl && apt-get clean
 
 RUN useradd builder -u 1000 -s /bin/bash -d /home/builder && \
 	mkdir -p /home/builder && \
@@ -22,4 +22,6 @@ RUN cd /opt && \
 
 ADD patches /opt/patches
 ADD args.gn /opt/
+RUN echo 'enable_nacl = false' >> /opt/args.gn
+RUN echo 'nacl_clang = false' >> /opt/args.gn
 ADD do_build.sh /
