@@ -59,10 +59,12 @@ def beautify_script(content, suffix):
     temp_file = "/tmp/%s_%s" % (filehash, suffix.replace("/", "_"))
 
     with open(temp_file, "w") as fh:
+        # print("line 62: opened file at ", temp_file)
         fh.write(content)
-    os.system("js-beautify -t -r %s > /dev/null" % temp_file)
+    os.system('js-beautify -t -r "%s" > /dev/null' % temp_file)
 
     with open(temp_file, "r") as fh:
+        # print("line 67: opened file at ", temp_file)
         content = fh.read()
     os.unlink(temp_file)
 
@@ -302,17 +304,18 @@ def main():
     #                                         " (note: a specific folder will be created)")
 
     # args = parser.parse_args()
-    crx_path = '/Users/sriram/cmu/browser-sec/project/crawled/crx'
-    out_dir = '/Users/sriram/cmu/browser-sec/project/crawled/out'
+    crx_path = '/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/chrome_extensions_archive/crawled_old/crx'
+    out_dir = '/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/DoubleX_mod/out'
     crx_exts = os.listdir(crx_path)
-    for ext in crx_exts:
-        print(ext)
+    for i, ext in enumerate(crx_exts):
+        print("Extension ID: ", ext)
         dest_path = os.path.join(out_dir, ext)
         os.makedirs(dest_path, exist_ok=True)
         source_crx = os.path.join(crx_path, ext)
         file_list = [f for f in glob.glob(os.path.join(source_crx, "*.zip"))]
         if len(file_list) > 0:
             unpack_extension(extension_crx=os.path.join(source_crx, file_list[0]), dest=dest_path)
+        print("Finished unpacking extension:", i)
 
 
 if __name__ == "__main__":

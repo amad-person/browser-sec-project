@@ -20,6 +20,7 @@
 
 import os
 import argparse
+import pandas as pd
 
 from vulnerability_detection import analyze_extension
 
@@ -34,10 +35,6 @@ def main():
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      description="Static analysis of a browser extension to detect "
                                                  "suspicious data flows")
-
-    sources_path = '/Users/sriram/cmu/browser-sec/project/crawled/sources'
-
-
 
     # parser.add_argument("-cs", "--content-script", dest='cs', metavar="path", type=str,
     #                     help="path of the content script. "
@@ -76,19 +73,26 @@ def main():
     # if bp is None:
     #     bp = os.path.join(os.path.dirname(SRC_PATH), 'empty', 'background.js')
 
-    out_path = '/Users/sriram/cmu/browser-sec/project/crawled/analysis'
-    exts_path = '/Users/sriram/cmu/browser-sec/project/crawled/out'
-    exts = os.listdir(exts_path)
+    out_path = '/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/DoubleX_mod/analysis'
+    exts_path = '/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/DoubleX_mod/out'
+    # exts = os.listdir(exts_path)
+
+    df = pd.read_csv("/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/DoubleX_mod/src/all_exts.csv")
+    exts = df["ext_ids"]
     for ext in exts:
         ext_path = os.path.join(exts_path, ext)
         analysis_path = os.path.join(out_path, ext)
         if os.path.exists(analysis_path):
+            print("Already analyzed extension: ", ext)
             continue
         print(ext, ext_path, analysis_path)
         try:
             analyze_extension("{}/content_scripts.js".format(ext_path), "{}/background.js".format(ext_path),
-                              json_analysis=analysis_path, chrome=True,
-                              war=None, json_apis='all', manifest_path="{}/manifest.json".format(ext_path))
+                              json_analysis=analysis_path, 
+                              chrome=True,
+                              war=None, json_apis='all', 
+                              manifest_path="{}/manifest.json".format(ext_path))
+            print("Finished analysis for extension: ", ext)
         except:
             continue
 
