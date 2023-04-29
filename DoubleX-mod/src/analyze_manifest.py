@@ -22,9 +22,7 @@ def analyze_extension_manifest(ext_id, manifest_file_path, manifest_analysis_pat
     except Exception as e:
         print("error")
 
-    # Number of API and host permissions declared
-    # For now we check whether critical/high risk APIs have been declared 
-    # We don't check whether they are in host or optional 
+    # Number of critical and high risk API permissions declared
     num_api_permissions = 0
     num_critical_risk_api_permissions = 0
     num_high_risk_api_permissions = 0
@@ -54,6 +52,7 @@ def analyze_extension_manifest(ext_id, manifest_file_path, manifest_analysis_pat
     res_dict["num_critical_risk_api_permissions"] = num_critical_risk_api_permissions
     res_dict["num_high_risk_api_permissions"] = num_high_risk_api_permissions
 
+    # Number of critical and high risk host permissions declared
     num_host_permissions = 0
     num_critical_risk_host_permissions = 0
     num_high_risk_host_permissions = 0
@@ -80,6 +79,58 @@ def analyze_extension_manifest(ext_id, manifest_file_path, manifest_analysis_pat
 
     res_dict["num_critical_risk_host_permissions"] = num_critical_risk_host_permissions
     res_dict["num_high_risk_host_permissions"] = num_high_risk_host_permissions
+
+    # Where each critical risk API permission is declared
+    for critical_api_perm in CRITICAL_RISK_API_PERMISSIONS:
+        res_dict_key = f"where_{critical_api_perm}"
+        res_dict_value = "Not Declared"
+        if "permissions" in manifest:
+            if critical_api_perm in manifest["permissions"]:
+                res_dict_value = "Permissions"
+
+        if "optional_permissions" in manifest:
+            if critical_api_perm in manifest["optional_permissions"]:
+                res_dict_value = "Optional Permissions"
+        res_dict[res_dict_key] = res_dict_value
+
+    # Where each high risk API permission is declared
+    for high_api_perm in HIGH_RISK_API_PERMISSIONS:
+        res_dict_key = f"where_{high_api_perm}"
+        res_dict_value = "Not Declared"
+        if "permissions" in manifest:
+            if high_api_perm in manifest["permissions"]:
+                res_dict_value = "Permissions"
+
+        if "optional_permissions" in manifest:
+            if high_api_perm in manifest["optional_permissions"]:
+                res_dict_value = "Optional Permissions"
+        res_dict[res_dict_key] = res_dict_value
+
+    # Where each critical risk host permission is declared
+    for critical_host_perm in CRITICAL_RISK_HOST_PERMISSIONS:
+        res_dict_key = f"where_{critical_host_perm}"
+        res_dict_value = "Not Declared"
+        if "host_permissions" in manifest:
+            if critical_host_perm in manifest["host_permissions"]:
+                res_dict_value = "Host Permissions"
+
+        if "optional_host_permissions" in manifest:
+            if critical_host_perm in manifest["optional_host_permissions"]:
+                res_dict_value = "Optional Host Permissions"
+        res_dict[res_dict_key] = res_dict_value
+
+    # Where each high risk host permission is declared
+    for high_host_perm in HIGH_RISK_HOST_PERMISSIONS:
+        res_dict_key = f"where_{high_host_perm}"
+        res_dict_value = "Not Declared"
+        if "host_permissions" in manifest:
+            if high_host_perm in manifest["host_permissions"]:
+                res_dict_value = "Host Permissions"
+
+        if "optional_host_permissions" in manifest:
+            if high_host_perm in manifest["optional_host_permissions"]:
+                res_dict_value = "Optional Host Permissions"
+        res_dict[res_dict_key] = res_dict_value
 
     # Whether CSP is declared
     is_csp_declared = 0  # 0 = false
@@ -125,15 +176,14 @@ def main():
     
     df = pd.read_csv("/Users/aadyaamaddi/Desktop/MSIT_PE/Spring 2023/14828 Browser Security/project/DoubleX_mod/src/all_exts.csv")
     exts = df["ext_ids"]
-    print(len(exts))
     for i, ext in enumerate(exts):
         if (ext.endswith(".zip") is False):
             # ext = "adbacgifemdbhdkfppmeilbgppmhaobf" # (DEBUGGING)
             ext_path = os.path.join(ext_source_path, ext)
             manifest_analysis_path = os.path.join(out_path, f"{ext}.json")
-            if os.path.exists(manifest_analysis_path):
-                # print(f"Already analyzed extension {i} manifest: ", ext)
-                continue
+            # if os.path.exists(manifest_analysis_path):
+            #     # print(f"Already analyzed extension {i} manifest: ", ext)
+            #     continue
             print(f"Analyzing manifest for extension {i}, storing results at {manifest_analysis_path}")
 
             analyze_extension_manifest(
