@@ -5,7 +5,9 @@
       "execution": [
         "eval",
         "setInterval",
-        "setTimeout"
+        "setTimeout",
+        "innerHTML",
+        "document.write"
       ],
       "bypass_sop": [
         "XMLHttpRequest().open",
@@ -22,16 +24,28 @@
         "$.post",
         "jQuery.post",
         "$http.get",
-        "$http.post"
+        "$http.post",
+        "runtime.sendMessage"
       ]
     },
-    "exfiltration_dangers": {}
+    "exfiltration_dangers": {
+      "cookies": [
+        "cookies.getAll"
+      ],
+      "privacy": [
+        "storage.local.get",
+        "storage.sync.get",
+        "navigator.clipboard.read",
+        "tabs.captureVisibleTab"
+      ]
+    }
   },
   "bp": {
     "direct_dangers": {
       "execution": [
         "eval",
         "tabs.executeScript",
+        "scripting.executeScript",
         "setInterval",
         "setTimeout"
       ],
@@ -53,7 +67,10 @@
         "$.post",
         "jQuery.post",
         "$http.get",
-        "$http.post"
+        "$http.post",
+        "runtime.sendMessage",
+        "extension.connect",
+        "runtime.connect"
       ]
     },
     "exfiltration_dangers": {
@@ -63,7 +80,10 @@
       "privacy": [
         "bookmarks.getTree",
         "history.search",
-        "topSites.get"
+        "topSites.get",
+        "storage.local.get",
+        "storage.sync.get",
+        "webRequest"
       ]
     }
   }
